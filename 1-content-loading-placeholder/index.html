@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../base.css">
+  <style>
+    :root{
+      --container-width: 300px;
+      --hightlight-width: 100px;
+    }
+    .loader{
+      width: var(--container-width);
+      padding: var(--space-4);
+      margin-bottom: var(--space-2);
+      border: var(--border);
+      border-radius: var(--radius);
+      background-color: var(--color-white);
+      box-shadow: var(--shadow);
+    }
+   
+    .bar{
+      position: relative;
+      width: 85%;
+      height: var(--space-2);
+      margin-bottom: var(--space-2);
+      
+      background-color: var(--color-gray-200);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .bar:last-child, .loader:last-child{
+      margin-bottom: 0;
+    }
+    
+    .bar:after{
+      position: absolute;
+      content: '';
+      left: calc(var(--hightlight-width)*-1);
+      
+      display: block;
+      height: 100%;
+      width: var(--hightlight-width);
+      background-image: linear-gradient(to right, rgba(255,255,255,0), 
+                                                    rgba(255,255,255,var(--opacity-50)),
+                                                    rgba(255,255,255,0));
+      animation: slide-over var(--transition-speed-slow) var(--transition-curve) infinite;
+    }
+    .bar2{
+      width: 45%;
+    }
+
+    .bar3{
+      width: 65%;
+    }
+    @keyframes slide-over {
+      0% {
+        left: calc(var(--hightlight-width)*-1);
+      }
+      100% {
+        left: 100%;
+      }
+    }
+  </style>
+  <title>Document</title>
+</head>
+<body>
+  <div>
+    <div class="loader">
+      <div class="bar bar1"></div>
+      <div class="bar bar2"></div>
+      <div class="bar bar3"></div>
+    </div>
+    <div class="loader">
+      <div class="bar bar1"></div>
+      <div class="bar bar2"></div>
+      <div class="bar bar3"></div>
+    </div>
+  </div>
+  <script>
+    // 1. grab all of the bars and put them into a variable
+    const bars = document.querySelectorAll('.bar');
+    const max = 100;
+    const min = 40;
+    // 2. go through all of the bars one by one and alter their width to be something between 40-100%
+    bars.forEach(bar => {
+      bar.style.width = `${Math.floor(Math.random() * (max - min) + min)}% `;
+    });
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../base.css" />
+    <title>Plus minus buttons</title>
+    <style>
+      /* Your styles here */
+      :root{
+        --width-container: 450px;
+
+      }
+
+      .container{
+        width: var(--width-container);
+        padding: 0 var(--space-8);
+        background-color: var(--color-white);
+        border: var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+      }
+      .input-row{
+        display: flex;
+        padding: var(--space-8) 0;
+        border-bottom: var(--border);
+      }
+
+      .input-row:last-child{
+        border-bottom: 0;
+      }
+
+      .title{
+        margin-right: var(--space-8);
+      }
+
+      .label{
+        font-weight: bold;
+        font-size: var(--text-xl);
+      }
+      
+      .description{
+        color: var(--color-gray-600);
+      }
+
+      .input{
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+      }
+
+      button{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--space-12);
+        height: var(--space-12);
+        border: 1px solid var(--color-blue-500);
+        border-radius: var(--round);
+        background-color: var(--color-white);
+      }
+      button:hover{
+        background-color: var(--color-blue-200);
+        cursor: pointer;
+      }
+
+      button:focus{
+        outline: none;
+        box-shadow: var(--shadow-focus);
+      }
+
+      button:active{
+        background-color: var(--color-blue-300);
+      }
+      
+      button[disabled] {
+        opacity: var(--opacity-50);
+        pointer-events: none;
+      }
+      .number{
+        font-size: var(--text-lg);
+        min-width: var(--space-12);
+        text-align: center;
+      }
+
+      .dim{
+        color: var(--color-gray-400);
+      }
+
+      .icon{
+         user-select: none;
+      }
+    </style>
+
+  </head>
+  <body>
+    <div class="container">
+      <div class="input-row">
+        <div class="title">
+          <h3 class="label">Number</h3>
+          <p class="description">Pick a number between 0 and 10</p>
+        </div>
+        <div class="input">
+          <button class="minus" disabled>
+            <img src="icon-minus.svg" alt="" class="icon" aria-label="Decrease by one">
+          </button>
+          <div class="number dim">
+            0
+          </div>
+          <button class="plus">
+            <img src="icon-plus.svg" alt="" class="icon" aria-label="Increase by one">
+          </button>
+        </div>
+      </div>
+      
+    </div>
+    
+    <script>
+
+      // 0. get all the buttons
+      const buttons = document.querySelectorAll('button');
+      const min = 0;
+      const max = 10;
+      buttons.forEach( (button) => {
+         // 1. get the clicked element (button)
+        button.addEventListener('click', (event) => {
+          const element = event.currentTarget;
+         
+          // 2. get the parent element of button
+            const parent = element.parentNode;
+            
+          // 3. get the number (within that parent)
+          const numberContainer = parent.querySelector('.number');
+          
+          const number = parseFloat(numberContainer.textContent);
+          
+          // 4. get minus and plus buttons
+          const increment = parent.querySelector('.plus');
+          const decrement = parent.querySelector('.minus');
+        
+
+          // 5. change the number based on the click (either plus/minus)
+          const newNumber = element.classList.contains('plus') 
+          ? number + 1
+          : number-1 ;
+          
+          numberContainer.textContent = newNumber;
+          // 6. disable and enable buttons based on the number value (dim/undim)
+          if (newNumber === min) {
+            decrement.disabled = true;
+            numberContainer.classList.add('dim');
+            element.blur();
+          }
+          else if(newNumber===max) {
+            increment.disabled = true;
+            element.blur();
+          }
+          else if(newNumber>min && newNumber< 10){
+            decrement.disabled = false;
+            increment.disabled = false;
+            numberContainer.classList.remove('dim');
+          }
+        });
+
+      });
+
+     
+          
+    </script>
+  </body>
+</html>

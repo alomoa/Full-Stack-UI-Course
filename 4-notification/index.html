@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../base.css" />
+    <title>Notification</title>
+    <style>
+      /* Your styles here */
+      :root{
+        --width-notification: 350px;
+
+      }
+
+      .notification{
+        position: fixed;
+        display: flex;
+        width: var(--width-notification);
+        
+        right: var(--space-4);
+        border: var(--border);
+        background-color: var(--color-white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        transition: top var(--transition-speed) var(--transition-curve);
+        animation: slide-in var(--transition-speed) var(--transition-curve);
+      }
+      .content{
+        padding: var(--space-4);
+      }
+
+      .title{
+        font-size: var(--text-md);
+        margin-bottom: var(--space-1);
+        font-weight: bold;
+      }
+
+      .description{
+        color: var(--color-gray-600);
+      }
+
+      .close{
+        padding: var(--space-4);
+        font-size: var(--text-md);
+        margin-left: auto;
+        border: 0;
+        border-left: 1px solid var(--color-border);
+        color: var(--color-gray-600);
+        border-radius: 0 var(--radius) var(--radius) 0;
+        background-color: transparent;
+      }
+      .close:hover{
+        background-color: var(--color-gray-100);
+      }
+      .close:active{
+        color: var(--color-gray-900);
+      }
+      .close:focus, .close:active{
+        outline: none;
+        box-shadow: var(--shadow-focus);
+      }
+
+      .add{
+        position:fixed;
+        bottom: var(--space-4);
+        left: var(--space-4);
+        padding: var(--space-2);
+      }
+      
+      .animate-out{
+        animation: fade-out  var(--transition-speed) var(--transition-curve);
+      }
+      @keyframes slide-in{
+        from{
+          transform: translateX(var(--width-notification));
+        }
+      }
+      @keyframes fade-out{
+        to{
+          opacity: 0;
+          transform: translate(var(--width-notification));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <!-- Your HTML here -->
+     
+      <button class="add">+ Add notification</button>
+    </div>
+    <!-- Your JavaScript here -->
+    <script>
+      const notificationTexts = [
+        "Hey Jussi! If you're recording your screen, I just wanted to tell that...",
+        "Congratulations, you've found the meaning of life, which by the way is being present.",
+        "You looked super today! Where's that smile from?",
+        'COME HOME ALREADY! -MOM',
+        "How are you doing? Dismiss this message to tell me that you've seen it.",
+        "Dude, I've never slided so smoothly into anything before! Well, that sounded a bit weird to be honest.",
+        'Did you know that LASER is an abbreviation for Light Amplification by the Stimulated Emission of Radiation?',
+      ];
+
+      const margin = 16;
+      const addButton = document.querySelector('.add');
+      
+     
+
+      const addNotification = () => {
+        
+        const notificationPosition = document.body.querySelector('div');
+        
+        //1. create notification
+        const notification = document.createElement('div');
+        notification.classList.add('notification');
+        const randomMessage = notificationTexts[
+          Math.floor(Math.random()*notificationTexts.length)];
+        //2. Add content to that notification
+        notification.innerHTML = `
+          <div class="content">
+            <h3 class="title">
+              New Message    
+            </h3>
+            <p class="description">${randomMessage}
+            </p>
+          </div> 
+          <button class="close" aria-label="Dismiss notification">Close</button> 
+        `;
+        const closeButton = notification.querySelector('.close');
+        closeButton.addEventListener('click', removeNotification);
+        //3. Place the notification to the page
+        notificationPosition.prepend(notification);
+
+        //4. position the notification from top
+        notification.style.top = `${margin}px`;
+        //5. move other notifications down
+        // - get the height of the added notiication
+        const currentHeight = notification.offsetHeight;
+        // = get the rest of the notifications
+        const restNotification = Array.from(
+          document.querySelectorAll('.notification')).
+          slice(1);
+        // - add the currently added notifications' height to the rest of the notifications
+        restNotification.forEach(item => {
+          item.style.top = `${parseInt(item.style.top) + currentHeight + margin}px`;
+        });
+      };
+
+       
+      const removeNotification = event => {
+        
+        //get the necessary element
+        const closeButton = event.currentTarget;
+        const notification = closeButton.parentNode;
+        //get the height of the clicked notification
+        const currentHeight = notification.offsetHeight;
+
+        //get the rest of the notification
+        let restNotification = [];
+        let next = notification.nextElementSibling;
+        console.log(next);
+        while (next){
+          if (!next.classList.contains('notification')) {
+            break;
+          }
+         
+            restNotification.push(next);
+            next = next.nextElementSibling;
+          
+        }
+
+        restNotification.forEach(item => {
+          item.style.top = `${parseInt(item.style.top) - currentHeight - margin}px`
+        })
+        //animate the removed noticication
+        notification.classList.add('animate-out');
+        //remove the notification
+        notification.addEventListener('animationend', () => {
+          notification.parentNode.removeChild(notification);
+        })
+      };
+      
+      addButton.addEventListener('click', addNotification);
+    </script>
+  </body>
+</html>

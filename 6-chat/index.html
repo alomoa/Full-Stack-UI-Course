@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../base.css" />
+    <title>Chat</title>
+    <style>
+      /* Your styles here */
+      :root{
+        --width-chat: 250px;
+      }
+      .chat{
+        position: fixed;
+        display:block;
+        bottom: var(--space-16);
+        right: var(--space-4);
+        width: var(--width-chat);
+        border-radius: var(--radius);
+        border: var(--border);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(var(--space-8)) scale(0.9);
+        transform-origin: right;
+        background-color: var(--color-white);
+        transition: var(--transition);
+      }
+      .chat.visible{
+        opacity: var(--opacity-100);
+        pointer-events: all;
+        transform: translateY(0) scale(1);
+        
+      }
+
+      .window{
+        display: flex;
+        height: var(--width-chat);
+        flex-direction: column;
+        padding: var(--space-3);
+        overflow-y: scroll;
+      }
+
+      .bubble{
+        max-width: 80%;
+        font-size: var(--text-sm);
+        word-break: break-word;
+        padding: var(--space-1) var(--space-2);
+        background-color: var(--color-gray-200);
+        margin-bottom: var(--space-1);
+        border-radius: var(--radius);
+      }
+      .bubble.guest{
+        align-self: flex-start;
+      }
+      .bubble.own{
+        align-self: flex-end;
+        background-color: var(--color-blue-400);
+        color: var(--color-white);
+      }
+      .own + .guest, .guest + .own{
+        margin-top: var(--space-1);
+      }
+
+      .bubble:last-child{        
+        margin-bottom: 0;
+      }
+
+      .toggle{
+        position: fixed;
+        bottom: var(--space-4);
+        font-size: var(--text-md);
+        right: var(--space-4);
+        padding: var(--space-2) var(--space-3);
+        border: var(--border);
+        border-radius: var(--radius);
+        background-color: var(--color-white);
+        outline: none;
+        transition: min-width var(--transition-speed) var(--transition-curve);
+      }
+
+      .toggle:hover, .toggle:focus{
+        border-color: var(--color-gray-300);
+        cursor: pointer;
+      }
+      .toggle:active{
+        border-color: var(--color-gray-400);
+      }
+      .name{
+        display: flex;
+        align-items: center;
+      }
+      .name:before{
+        display: block;
+        content: '';
+        width: var(--space-2);
+        height: var(--space-2);
+        margin-right: var(--space-2);
+        border-radius: var(--round);
+        background-color: green;
+      }
+      
+      .input{
+        display: flex;
+        flex-direction: row;
+        padding: var(--space-3);
+        border-top: var(--border);
+      }
+
+      .field{
+        font-size: var(--text-md);
+        border: 0;
+        width: 100%;
+        outline: none;
+      }
+
+      .send{
+        padding: var(--space-2) var(--space-3);
+        border: 0;
+        margin-left: auto;
+        font-weight: bold;
+        border-radius: var(--radius);
+        outline: none;
+      }
+      .send.active{
+        background-color: var(--color-blue-400);
+        color: var(--color-white);
+      }
+      .send:focus{
+        box-shadow: var(--shadow-focus);
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <!-- Your HTML here -->
+      <button class="toggle">
+        <div class="name">Nerd</div>
+      </button>
+      <div class="chat" aria-hidden="true">
+        <div class="window">
+          <div class="bubble guest">Sup</div>           
+        </div>
+        <div class="input">
+          <input type="text" class="field" placeholder="Type...">
+          <button class="send" disabled>Send</button>
+        </div>
+      </div>
+    </div>
+    <!-- Your JavaScript here -->
+    <script>
+      //get elemtents
+      const chatContainer = document.querySelector('.chat');
+      const chatField = document.querySelector('.field');
+      const sendButton = document.querySelector('.send');
+      const chatWindow = document.querySelector('.window');
+      const chatToggle = document.querySelector('.toggle');
+      let chatOpen = false;
+      const keyword = 'nerd'
+
+      //get original toggle width 
+      const toggleWidth = chatToggle.offsetWidth;
+
+      //get chat window width
+      const chatWidth = chatWindow.offsetWidth;
+
+      chatToggle.style.minWidth = `${toggleWidth}px`;
+
+      console.log(toggleWidth)
+
+      const toggleChat = (event) => {
+        //show/hide the chat window
+        chatContainer.classList.toggle('visible');
+        //tell the screenreaders the chat is visible
+        chatContainer.setAttribute('aria-hidden', false);
+        //focus text input field
+        
+        //resize the toggle
+        resizeToggle();
+  
+       
+  
+        chatOpen = !chatOpen;
+        event.stopPropagation();
+
+      };
+      const closeChat = () => {
+        //close chat
+        chatContainer.classList.remove('visible');
+        //let screenreader know that chat is closed
+        chatContainer.setAttribute('aria-hidden', true);
+        //resize toggle
+        resizeToggle();
+        //set chatOpen to false
+        chatOpen = false;
+        //defocus input field
+        chatField.blur();
+        //focus on toggle
+        chatToggle.focus();
+      }
+      const resizeToggle = () => {
+        if(chatOpen){
+          chatToggle.style.minWidth = `${toggleWidth}px`;
+        }
+        else{
+          chatToggle.style.minWidth = `${chatWidth}px`;
+          chatField.focus();
+        }
+      }
+      
+      //adding messages
+      const addMsg = (event) => {
+        
+        //create new message
+        if(chatField.value.length > 0 && chatField.value.trim()){
+          createBubble(chatWindow, chatField.value, 'own');
+          if(chatField.value.includes(keyword)){
+            addResponse("Who are you calling a nerd?");
+          }
+
+          if(chatField.value.includes('You')){
+            addResponse("Bruh");
+          }
+
+
+          //empty textfield
+          chatField.value = "";
+          //remove active state from button
+          sendButton.classList.remove('active');
+          sendButton.disabled = true;
+          //refocus textfield
+          chatField.focus();
+       }
+      };
+      
+      const addResponse = (message) => {
+        setTimeout(() => {
+          createBubble(chatWindow, message, 'guest');
+        }, 500);
+      }
+
+      const createBubble = (destination, message, owner = 'own') => {
+        //create a div
+        const chatBubble = document.createElement('div');
+        //set class for div
+        chatBubble.className = 'bubble ';  
+        //check if bubble is own
+        if(owner === 'own'){
+          chatBubble.classList.add('own');
+        }
+        else{
+          chatBubble.classList.add('guest');
+        }
+        //set content of message 
+        chatBubble.innerText = message;  
+          //place the message to the chat window
+        destination.appendChild(chatBubble);
+          // scroll to the bottom of the chat window
+        destination.scrollTop = destination.scrollHeight;
+        
+      };
+      sendButton.addEventListener('click', addMsg);
+
+      //open and close chat
+      chatToggle.addEventListener('click', toggleChat);
+
+      //close chat window on click outside
+      window.addEventListener('click', event => {
+        //is chat open?
+        //is click outside the chat container?
+        if (chatOpen && !chatContainer.contains(event.target)) {
+          closeChat();
+        }
+        
+      });
+
+      //close the chat window on escape key
+      window.addEventListener('keydown', event => {
+        if(chatOpen && event.key === 'Escape'){
+          closeChat();
+        }
+      });
+
+      chatField.addEventListener('input', () => {
+        //if there is any content within the input field
+        //if the content is real (no spaces)
+        chatField.value;
+        if(chatField.value.length > 0 && chatField.value.trim()){
+          sendButton.classList.add('active');
+          sendButton.disabled = false;
+        }
+        else{
+          sendButton.classList.remove('active');
+          sendButton.disabled = true;
+        }
+      });
+
+      window.addEventListener('keydown', (event) => {
+        if(event.key === 'Enter' && chatOpen){
+          addMsg();
+        }
+      });
+    </script>
+  </body>
+</html>

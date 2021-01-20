@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../base.css" />
+    <title>Feedback component</title>
+    <style>
+      /* Your styles here */
+      :root{
+        --container-width: 350px;
+      }
+      .container{
+        padding: var(--space-6);
+        width: var(--container-width);
+        border: var(--border);
+        box-shadow: var(--shadow);
+        border-radius: var(--radius);
+        background-color: var(--color-white);
+      }
+
+      .title{
+        font-size: var(--text-md);
+        margin-bottom: var(--space-4);
+        font-weight: bold;
+        text-align: center;
+        color: var(--color-gray-900);
+      }
+
+      .buttons{
+        display: grid;
+        grid-auto-flow: column;
+        gap: var(--space-4);
+
+      }
+
+      .button{
+        height: var(--space-12);
+        font-size: var(--text-xl);
+        border: var(--border);
+        border-radius: var(--radius);
+        background-color: var(--color-white);
+        box-shadow: var(--shadow);
+        cursor: pointer;
+        outline: none;
+        filter: grayscale(1);
+      }
+      .button:hover{
+        border-color: var(--color-gray-400);
+        filter: none;
+      }
+      .button:focus{
+        box-shadow: var(--shadow-focus);
+        border-color: var(--color-gray-400); 
+        filter: none;
+      }
+      .button:active{
+        border-color: var(--color-blue-500);
+        box-shadow: inset var(--shadow), var(--shadow-focus);
+        filter: none;
+      }
+
+      .button.selected{
+        border-color: var(--color-blue-500);
+        background-color: var(--color-blue-200);
+        box-shadow: none;
+        filter: none;
+      }
+      
+      .feedback{
+        height: 0;
+        transition: var(--transition-bounce);
+      }
+
+      .content{
+        /* */
+        opacity: 0;
+      }
+      
+      .content.visible{ 
+        margin-top: var(--space-4);
+        transition: var(--transition);
+        opacity: 1;
+      }
+
+      .emoji{
+        display: block;
+        pointer-events: none;
+        transition: var(--transition-bounce);
+      }
+
+      .emoji.emphasize{
+        transform: scale(3);
+      }
+      .field{
+        display: block;
+        width: 100%;
+        margin-top: var(--space-4);
+        padding: var(--space-2);
+        font-size: var(--text-md);
+        border: var(--border);
+        border-radius: var(--radius);
+       }
+
+      .submit{
+        margin-top: var(--space-4);
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: var(--space-3) var(--space-5);
+        border: 0;
+        font-size: var(--text-lg);
+        font-weight: bold;
+        background-color: var(--color-blue-400);
+        color: var(--color-white);
+        border-radius: var(--radius);
+        cursor: pointer;
+        outline: none;
+
+      }
+
+      .submit:hover{
+        background-color: var(--color-blue-300);
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <!-- Your HTML here -->
+      <div class="container">
+        <h2 class="title">How was your day?</h2>
+        <div class="buttons">
+          <button class="button" value="negative" >
+            <span class="emoji">🙁</span>
+          </button>
+          <button class="button" value="negative">
+            <span class="emoji">😕</span>
+          </button>
+          <button class="button" value="positive">
+            <span class="emoji">😀</span>
+          </button>
+          <button class="button" value="positive">
+            <span class="emoji">😁</span>
+          </button>
+        </div>
+        <div class="feedback">
+          <div class="content"></div>
+          
+        </div>
+      </div>
+    </div>
+    <!-- Your JavaScript here -->
+    
+    <script>
+      const buttons =document.querySelectorAll('.button');
+      const feedback = document.querySelector('.feedback');
+      const content = document.querySelector('.content');
+
+      const giveRating = event =>{
+
+        //grab the clicked button element
+        const element = event.currentTarget;
+        //grab the value of that element
+        const value = element.value;
+        
+
+        if (element.classList.contains('selected')) {
+          return;
+        }
+        
+        buttons.forEach(button => {
+        button.classList.remove('selected');
+        });
+
+        //grab the emoji
+        const emoji = element.querySelector('.emoji');
+        //add selected class to element
+        element.classList.add('selected');
+        //emphasize the emoji
+        emoji.classList.add('emphasize');
+        //show feedback
+        showFeedback(value);
+        //after transition animation, remove ephasis
+        emoji.addEventListener('transitionend', () => {
+          emoji.classList.remove('emphasize');
+          //defocus button
+          element.blur();
+        })
+      };
+
+      const showFeedback = value => {
+        createContent(value);
+
+        if (content.dataset.value === value) {
+          return;
+        }
+        else{
+          content.dataset.value = value;
+        }
+        
+        
+        //hide content while transitioning
+        content.classList.remove('visible');
+        feedback.style.height = `${content.scrollHeight}px`;
+        feedback.addEventListener('transitionend', () => {
+          content.classList.add('visible');
+        });
+      }
+
+      const createContent = (value) => {
+        if (value === 'positive') {
+          content.innerHTML = `
+          <p>Great to hear, enjoy your day!</p>
+         
+          `
+        }
+
+        else{
+          content.innerHTML = `
+          <p>What went wrong?</p>
+            <textarea 
+              class="field" 
+              rows="4" 
+              placeholder="What happened?"></textarea>
+              <button class="submit">Submit</button>
+          `
+        }
+      }
+
+      buttons.forEach(button=>{
+        button.addEventListener('click', giveRating);
+
+      });
+    </script>
+  </body>
+</html>
